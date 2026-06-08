@@ -1,0 +1,39 @@
+# Terraform local directories
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files with secrets
+*.tfvars
+*.tfvars.json
+
+# Terraform plan output
+*.tfplan
+tfplan
+plan.out
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local CLI config
+.terraformrc
+terraform.rc
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.agents/
+.codex/
+.claude/
+
