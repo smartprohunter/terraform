@@ -32,10 +32,8 @@ data "azurerm_client_config" "current" {}
 # Create a resource group
 resource "azurerm_resource_group" "rg" {
   name     = "resources"
-  location = "Sweden Central"
-  tags = {
-    environment = "dev"
-  }
+  location = var.resource_group_location
+  tags     = var.tags
 }
 
 # Create a virtual network within the resource group
@@ -44,9 +42,7 @@ resource "azurerm_virtual_network" "vn" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   address_space       = ["10.0.0.0/16"]
-  tags = {
-    environment = "dev"
-  }
+  tags                = var.tags
 }
 resource "azurerm_subnet" "subnet" {
   name                 = "subnet"
@@ -65,6 +61,7 @@ resource "azurerm_key_vault" "key_vault" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
+  tags                       = var.tags
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
@@ -98,6 +95,7 @@ resource "azurerm_storage_account" "storage_acc" {
   account_replication_type = "LRS"
   account_kind             = "StorageV2"
   is_hns_enabled           = true
+  tags                     = var.tags
 }
 
 
@@ -114,8 +112,9 @@ resource "azurerm_storage_container" "containers" {
 resource "azurerm_mssql_server" "azure_sql" {
   name                = "qjo-server-test"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = "swedencentral"
+  location            = azurerm_resource_group.rg.location
   version             = "12.0"
+  tags                = var.tags
 
   minimum_tls_version = "1.2"
 
@@ -126,9 +125,9 @@ resource "azurerm_mssql_server" "azure_sql" {
   administrator_login_password = var.azure_sql_admin_pass
   azuread_administrator {
     azuread_authentication_only = false
-    login_username              = "yavor.lozev_gmail.com#EXT#@yavorlozevgmail.onmicrosoft.com"
-    object_id                   = "5f088b92-1f52-4bb3-a061-4b0d66274597"
-    tenant_id                   = "9dc905ca-6b24-47e5-840e-979840c7f474"
+    login_username              = var.azure_sql_ad_admin_login_username
+    object_id                   = var.azure_sql_ad_admin_object_id
+    tenant_id                   = data.azurerm_client_config.current.tenant_id
   }
 }
 
@@ -141,6 +140,7 @@ resource "azurerm_mssql_database" "sqldb" {
   max_size_gb  = 2
   sku_name     = "S0"
   enclave_type = "VBS"
+  tags         = var.tags
 
   # prevent the possibility of accidental data loss
   # lifecycle {
@@ -152,6 +152,7 @@ resource "azurerm_data_factory" "adf" {
   name                = "${var.adf_name}-${random_id.randomized_names.hex}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  tags                = var.tags
 
   identity {
     type = "SystemAssigned"
